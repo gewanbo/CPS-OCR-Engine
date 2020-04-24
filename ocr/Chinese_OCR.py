@@ -45,7 +45,7 @@ tf.app.flags.DEFINE_boolean('epoch', 1, 'Number of epoches')
 tf.app.flags.DEFINE_integer('batch_size', 128, 'Validation batch size')
 tf.app.flags.DEFINE_string('mode', 'train', 'Running mode. One of {"train", "valid", "test"}')
 
-# gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.333)
+gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.333)
 FLAGS = tf.app.flags.FLAGS
 
 
@@ -106,8 +106,8 @@ def build_graph(top_k):
     images = tf.compat.v1.placeholder(dtype=tf.float32, shape=[None, 64, 64, 1], name='image_batch')
     labels = tf.compat.v1.placeholder(dtype=tf.int64, shape=[None], name='label_batch')
     is_training = tf.compat.v1.placeholder(dtype=tf.bool, shape=[], name='train_flag')
-    # with tf.device('/gpu:5'):
-    with tf.device('/cpu:0'):
+    with tf.device('/gpu:0'):
+    # with tf.device('/cpu:0'):
         # network: conv2d->max_pool2d->conv2d->max_pool2d->conv2d->max_pool2d->conv2d->conv2d->
         # max_pool2d->fully_connected->fully_connected
         # 给slim.conv2d和slim.fully_connected准备了默认参数：batch_norm
@@ -175,8 +175,8 @@ def train():
     train_feeder = DataIterator(data_dir='./dataset/train/')
     test_feeder = DataIterator(data_dir='./dataset/test/')
     model_name = 'chinese-rec-model'
-    # with tf.compat.v1.Session(config=tf.compat.v1.ConfigProto(gpu_options=gpu_options, allow_soft_placement=True)) as sess:
-    with tf.compat.v1.Session(config=tf.compat.v1.ConfigProto(allow_soft_placement=True)) as sess:
+    with tf.compat.v1.Session(config=tf.compat.v1.ConfigProto(gpu_options=gpu_options, allow_soft_placement=True)) as sess:
+    # with tf.compat.v1.Session(config=tf.compat.v1.ConfigProto(allow_soft_placement=True)) as sess:
         # batch data 获取
         train_images, train_labels = train_feeder.input_pipeline(batch_size=FLAGS.batch_size, aug=True)
         test_images, test_labels = test_feeder.input_pipeline(batch_size=FLAGS.batch_size)
@@ -252,8 +252,8 @@ def validation():
     final_predict_index = []
     groundtruth = []
 
-    # with tf.compat.v1.Session(config=tf.compat.v1.ConfigProto(gpu_options=gpu_options,allow_soft_placement=True)) as sess:
-    with tf.compat.v1.Session(config=tf.compat.v1.ConfigProto(allow_soft_placement=True)) as sess:
+    with tf.compat.v1.Session(config=tf.compat.v1.ConfigProto(gpu_options=gpu_options,allow_soft_placement=True)) as sess:
+    # with tf.compat.v1.Session(config=tf.compat.v1.ConfigProto(allow_soft_placement=True)) as sess:
         test_images, test_labels = test_feeder.input_pipeline(batch_size=FLAGS.batch_size, num_epochs=1)
         graph = build_graph(top_k=5)
         saver = tf.compat.v1.train.Saver()
@@ -349,8 +349,8 @@ def inference(name_list):
         image_set.append(temp_image)
 
     # allow_soft_placement 如果你指定的设备不存在，允许TF自动分配设备
-    # with tf.compat.v1.Session(config=tf.compat.v1.ConfigProto(gpu_options=gpu_options,allow_soft_placement=True)) as sess:
-    with tf.compat.v1.Session(config=tf.compat.v1.ConfigProto(allow_soft_placement=True)) as sess:
+    with tf.compat.v1.Session(config=tf.compat.v1.ConfigProto(gpu_options=gpu_options,allow_soft_placement=True)) as sess:
+    # with tf.compat.v1.Session(config=tf.compat.v1.ConfigProto(allow_soft_placement=True)) as sess:
         logger.info('========start inference============')
         # images = tf.compat.v1.placeholder(dtype=tf.float32, shape=[None, 64, 64, 1])
         # Pass a shadow label 0. This label will not affect the computation graph.
